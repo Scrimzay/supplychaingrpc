@@ -1,0 +1,184 @@
+syntax = "proto3";
+option go_package = "github.com/Scrimzay/supplychain/supplychain";
+
+package supplychain;
+
+// Represents a monetary amount
+message Amount {
+    int64 value = 1; // In smallest unit (e.g. cents)
+    string currency = 2;
+    string display_value = 3;
+}
+
+// Inventory item
+message Item {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    int32 quantity = 4;
+    Amount unit_price = 5;
+    int64 updated_at = 6;
+}
+
+// Order details
+message Order {
+    string id = 1;
+    string customer_id = 2;
+    repeated OrderItem items = 3;
+    Amount total = 4;
+    string status = 5;
+    int64 created_at = 6;
+}
+
+// Item in an Order
+message OrderItem {
+    string item_id = 1;
+    int32 quantity = 2;
+}
+
+// Shipment details
+message Shipment {
+    string id = 1;
+    string order_id = 2;
+    string status = 3;
+    string tracking_number = 4;
+    int64 updated_at = 5;
+}
+
+// requests and Responses
+message CreateItemRequest {
+    string name = 1;
+    string description = 2;
+    int32 quantity = 3;
+    Amount unit_price = 4;
+}
+
+message CreateItemResponse {
+    Item item  = 1;
+}
+
+message UpdateItemRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    int32 quantity = 4;
+    Amount unit_price = 5;
+}
+
+message UpdateItemResponse {
+    Item item = 1;
+}
+
+message DeleteItemRequest {
+    string id = 1;
+}
+
+message DeleteItemResponse {
+    bool success = 1;
+}
+
+message CreateOrderRequest {
+    string customer_id = 1;
+    repeated OrderItem items = 2;
+}
+
+message CreateOrderResponse {
+    Order order = 1;
+}
+
+message FulfillOrderRequest {
+    string order_id = 1;
+}
+
+message FulfillOrderResponse {
+    Order order = 1;
+}
+
+message CreateShipmentRequest {
+    string order_id = 1;
+    string tracking_number = 2;
+}
+
+message CreateShipmentResponse {
+    Shipment shipment = 1;
+}
+
+message UpdateShipmentRequest {
+    string id = 1;
+    string status = 2;
+    string tracking_number = 3;
+}
+
+message UpdateShipmentResponse {
+    Shipment shipment = 1;
+}
+
+message ListItemsRequest {
+    string name_filter = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message ListItemsResponse {
+    repeated Item items = 1;
+    int32 total = 2;
+}
+
+message GetOrderRequest {
+    string id = 1;
+}
+
+message GetOrderResponse {
+    Order order = 1;
+}
+
+message ListShipmentsRequest {
+    string order_id = 1;
+    int32 page = 2;
+    int32 page_size = 3;
+}
+
+message ListShipmentsResponse {
+    repeated Shipment shipments = 1;
+    int32 total = 2;
+}
+
+message AuditLogsRequest {
+  string api_key = 1;
+  int32 page = 2;
+  int32 page_size = 3;
+}
+message AuditLog {
+  int64 id = 1;
+  string api_key = 2;
+  string method = 3;
+  string request_data = 4;
+  string status = 5;
+  int64 timestamp = 6;
+}
+message AuditLogsResponse {
+  repeated AuditLog logs = 1;
+  int32 total = 2;
+}
+
+// SupplyChain service
+service SupplyChain {
+    // Inventory management
+    rpc CreateItem(CreateItemRequest) returns (CreateItemResponse);
+    rpc UpdateItem(UpdateItemRequest) returns (UpdateItemResponse);
+    rpc DeleteItem(DeleteItemRequest) returns (DeleteItemResponse);
+    rpc ListItems(ListItemsRequest) returns (ListItemsResponse);
+
+    // Order management
+    rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+    rpc FulfillOrder(FulfillOrderRequest) returns (FulfillOrderResponse);
+    rpc GetOrder(GetOrderRequest) returns (GetOrderResponse);
+
+    // Shipment management
+    rpc CreateShipment(CreateShipmentRequest) returns (CreateShipmentResponse);
+    rpc UpdateShipment(UpdateShipmentRequest) returns (UpdateShipmentResponse);
+    rpc ListShipments(ListShipmentsRequest) returns (ListShipmentsResponse);
+
+    // audit logs
+    rpc AuditLogs(AuditLogsRequest) returns (AuditLogsResponse);
+}
